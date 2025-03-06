@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei"
+import { OrbitControls, useTexture } from "@react-three/drei"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useRef, useMemo } from "react"
 
@@ -6,16 +6,16 @@ import vertexShader from "./shader/vertexShader.js"
 import fragmentShader from "./shader/fragmentShader.js"
 import { DoubleSide, Vector2 } from "three"
 
-
 export default function Shader(){
 
     const meshRef = useRef();
+    const brush = useTexture('/textures/brush.png');
   
     useFrame((state) => {
       let time = state.clock.getElapsedTime()
   
       // start from 20 to skip first 20 seconds ( optional )
-      meshRef.current.material.uniforms.uTime.value = time
+      // meshRef.current.material.uniforms.uTime.value = time
     
     })
   
@@ -42,12 +42,18 @@ export default function Shader(){
       scale={[1, 1, 1]}
       >
           <planeGeometry args={[1, 1]} />
-          <shaderMaterial
+          {/* <shaderMaterial
             uniforms={uniforms}
             vertexShader={vertexShader}
             fragmentShader={fragmentShader}
             side={DoubleSide}
-          />
+            map={brush}
+          /> */}
+           <meshBasicMaterial 
+           map={brush}
+           transparent={true}
+           />
+
         </mesh>
    </>
   )}
