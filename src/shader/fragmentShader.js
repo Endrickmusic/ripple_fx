@@ -13,7 +13,6 @@ float PI = 3.1415926;
 void main() {
 
     // Time varying pixel color
-    // vec3 col = 0.5 + 0.5*cos(uTime+vUv.xyx + vec3(0,2,4));
 
     // Output to screen
     vec3 col = vec3(vUv, 0.0);

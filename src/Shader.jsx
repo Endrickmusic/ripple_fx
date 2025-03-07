@@ -1,59 +1,43 @@
 import { OrbitControls, useTexture } from "@react-three/drei"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useRef, useMemo } from "react"
+import * as THREE from 'three'
 
 import vertexShader from "./shader/vertexShader.js"
 import fragmentShader from "./shader/fragmentShader.js"
 import { DoubleSide, Vector2 } from "three"
 
-export default function Shader(){
+export default function Shader() {
+    const brush = useTexture('/textures/brush.png')
+    const meshRef = useRef()
+    const max = 5
 
-    const meshRef = useRef();
-    const brush = useTexture('/textures/brush.png');
-  
-    useFrame((state) => {
-      let time = state.clock.getElapsedTime()
-  
-      // start from 20 to skip first 20 seconds ( optional )
-      // meshRef.current.material.uniforms.uTime.value = time
-    
-    })
-  
-      // Define the shader uniforms with memoization to optimize performance
-      const uniforms = useMemo(
-        () => ({
-          uTime: {
-            type: "f",
-            value: 1.0,
-              },
-          uResolution: {
-            type: "v2",
-            value: new Vector2(4, 3),
-            }
-         }),[]
-      )   
-      const viewport = useThree(state => state.viewport)
-  return (
-    <>
-      <OrbitControls />    
-      <mesh 
-      ref={meshRef}
-      // scale={[viewport.width, viewport.height, 1]}
-      scale={[1, 1, 1]}
-      >
-          <planeGeometry args={[1, 1]} />
-          {/* <shaderMaterial
-            uniforms={uniforms}
-            vertexShader={vertexShader}
-            fragmentShader={fragmentShader}
-            side={DoubleSide}
-            map={brush}
-          /> */}
-           <meshBasicMaterial 
-           map={brush}
-           transparent={true}
-           />
+    const meshes = useMemo(() => 
+        Array.from({ length: max }, () => ({
+            rotation: 2 * Math.PI * Math.random()
+        }))
+    , [max])
 
-        </mesh>
-   </>
-  )}
+    return (
+        <>
+            <OrbitControls />
+            {meshes.map((mesh, index) => (
+                <mesh 
+                    key={index}
+                    rotation-z={mesh.rotation}
+                >
+                    <planeGeometry args={[1, 1]} />
+                    <meshBasicMaterial 
+                        map={brush}
+                        transparent={true}
+                        blending={THREE.AdditiveBlending}
+
+                        depthTest={false}
+                        depthWrite={false}
+                        visible={false}
+                    />
+                </mesh>
+            ))}
+        </>
+    )
+}

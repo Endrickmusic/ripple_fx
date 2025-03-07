@@ -1,25 +1,38 @@
-import { Canvas } from '@react-three/fiber'
-import brush from '/textures/brush.png'
-
+import { Canvas } from "@react-three/fiber"
+import { OrthographicCamera } from "@react-three/drei"
+import { useThree } from "@react-three/fiber"
 import './index.css'
 import Shader from './Shader.jsx'
 
-function App() {
-  
-  console.log(brush)
-  return (
-  <>
+const Scene = () => {
+    const viewport = useThree((state) => state.viewport)
+    const frustumSize = viewport.height
+    const aspect = viewport.width / viewport.height
 
-    <Canvas
-    camera={{ 
-      position: [0, 0, 2],
-      fov: 40 }}  
-    >
-      <color attach="background" args={[0x000]} />
-      <Shader />
-    </Canvas>
-  </>
-  )
+    return (
+        <>
+            <OrthographicCamera 
+                makeDefault
+                position={[0, 0, 2]}
+                left={frustumSize * aspect / -2}
+                right={frustumSize * aspect / 2}
+                top={frustumSize / 2}
+                bottom={frustumSize / -2}
+                near={-1000}
+                far={1000}
+            />
+            <Shader />
+        </>
+    )
 }
 
-export default App
+export default function App() {
+    return (
+        <Canvas
+            gl={{ alpha: false }}
+        >
+            <color attach="background" args={['#000000']} />
+            <Scene />
+        </Canvas>
+    )
+}
