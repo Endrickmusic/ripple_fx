@@ -113,37 +113,8 @@ export default function Shader() {
   // Shader material that displays the render target with cloud texture
   const displayMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
-      vertexShader: `
-        varying vec2 vUv;
-        
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D uTexture;
-        uniform sampler2D uDisplacement;
-        varying vec2 vUv;
-
-        float PI = 3.14159265359;
-        
-        void main() {
-
-          vec4 displacement = texture2D(uDisplacement, vUv);
-          float theta = displacement.r * 2. * PI;
-
-          vec2 dir = vec2(sin(theta), cos(theta));
-
-          vec2 uv = vUv + dir * displacement.r;
-          vec4 color = texture2D(uTexture, uv);
-         
-          
-          // Blend the render target with the cloud texture
-          gl_FragColor = vec4(color);
-        //   gl_FragColor = vec4(displacement);
-        }
-      `,
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
       uniforms: {
         uTexture: { value: cloudTexture },
         uDisplacement: { value: null },
