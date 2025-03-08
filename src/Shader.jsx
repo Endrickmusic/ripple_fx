@@ -31,10 +31,13 @@ export default function Shader() {
     const deltaX = Math.abs(mousePos.x - prevMousePos.x)
     const deltaY = Math.abs(mousePos.y - prevMousePos.y)
 
-    if (deltaX > 40 || deltaY > 40) {
+    if (deltaX > 4 || deltaY > 4) {
       setCurrentWave((prev) => {
+        meshRefs.current[prev].visible = true
         meshRefs.current[prev].material.visible = true
         meshRefs.current[prev].position.set(mousePos.x, mousePos.y, 0)
+        meshRefs.current[prev].material.opacity = 1.0
+        meshRefs.current[prev].scale.x = meshRefs.current[prev].scale.y = 1.0
         console.log("Incrementing wave from:", prev)
         return (prev + 1) % max
       })
@@ -47,6 +50,18 @@ export default function Shader() {
     const y = (state.pointer.y * viewport.height) / 2
 
     setMousePos(new Vector2(x, y))
+
+    meshRefs.current.forEach((mesh) => {
+      if (mesh && mesh.visible) {
+        mesh.rotation.z += 0.02
+        mesh.material.opacity *= 0.96
+        mesh.scale.x = 0.98 * mesh.scale.x + 0.1
+        mesh.scale.y = mesh.scale.x
+        if (mesh.material.opacity < 0.02) {
+          mesh.visible = false
+        }
+      }
+    })
   })
 
   return (
