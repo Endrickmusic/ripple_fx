@@ -1,25 +1,25 @@
 const fragmentShader = `
+        uniform sampler2D uTexture;
+        uniform sampler2D uDisplacement;
+        varying vec2 vUv;
 
-uniform float uTime;
-uniform float progress;
-uniform sampler2D texture1;
-uniform vec4 uResolution;
-varying vec2 vUv;
-varying vec3 vPosition;
-varying vec3 vColor;
-float PI = 3.1415926;
+        float PI = 3.14159265359;
+        
+        void main() {
 
+          vec4 displacement = texture2D(uDisplacement, vUv);
+          float theta = displacement.r * 2. * PI;
 
-void main() {
+          vec2 dir = vec2(sin(theta), cos(theta));
 
-    // Time varying pixel color
-
-    // Output to screen
-    vec3 col = vec3(vUv, 0.0);
-    gl_FragColor = vec4(col, 1.0);
-	
-}
-
-`
+          vec2 uv = vUv + dir * displacement.r;
+          vec4 color = texture2D(uTexture, uv);
+         
+          
+          // Blend the render target with the cloud texture
+          gl_FragColor = vec4(color);
+        //   gl_FragColor = vec4(displacement);
+        }
+      `
 
 export default fragmentShader
