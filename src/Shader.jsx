@@ -18,10 +18,24 @@ export default function Shader() {
   const { viewport, size, gl } = useThree()
   const renderTargetRef = useRef()
   const sceneRef = useRef(new THREE.Scene())
-  const cameraRef = useRef(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10))
+  const cameraRef = useRef()
 
   // Initialize render target
   useEffect(() => {
+    // Create orthographic camera with proper aspect ratio
+    const aspect = size.width / size.height
+    const frustumSize = size.height
+
+    cameraRef.current = new THREE.OrthographicCamera(
+      (frustumSize * aspect) / -2, // left
+      (frustumSize * aspect) / 2, // right
+      frustumSize / 2, // top
+      frustumSize / -2, // bottom
+      -1000, // near
+      1000 // far
+    )
+    // cameraRef.current.position.z = 1
+
     renderTargetRef.current = new THREE.WebGLRenderTarget(
       size.width,
       size.height,
@@ -59,11 +73,9 @@ export default function Shader() {
       setCurrentWave((prev) => {
         meshRefs.current[prev].visible = true
         meshRefs.current[prev].material.visible = true
-        // Scale position to fit in the -1 to 1 range of the orthographic camera
-        const scaledX = (mousePos.x / (viewport.width / 2)) * 0.8
-        const scaledY = (mousePos.y / (viewport.height / 2)) * 0.8
-        meshRefs.current[prev].position.set(scaledX, scaledY, 0)
-        meshRefs.current[prev].material.opacity = 1.0
+
+        meshRefs.current[prev].position.set(mousePos.x, mousePos.y, 0)
+        meshRefs.current[prev].material.opacity = 0.5
         meshRefs.current[prev].scale.x = meshRefs.current[prev].scale.y = 0.2 // Smaller scale for the portal scene
         console.log("Incrementing wave from:", prev)
         return (prev + 1) % max
@@ -82,9 +94,9 @@ export default function Shader() {
       if (mesh && mesh.visible) {
         mesh.rotation.z += 0.02
         mesh.material.opacity *= 0.96
-        mesh.scale.x = 0.98 * mesh.scale.x + 0.02
+        mesh.scale.x = 0.982 * mesh.scale.x + 0.03
         mesh.scale.y = mesh.scale.x
-        if (mesh.material.opacity < 0.02) {
+        if (mesh.material.opacity < 0.00001) {
           mesh.visible = false
         }
       }
@@ -149,13 +161,13 @@ export default function Shader() {
 
   return (
     <>
-      <OrbitControls />
+      {/* <OrbitControls /> */}
 
       {/* Portal for brush meshes - these will only render to the render target */}
       {createPortal(
         <>
           {/* Clear background for the render target */}
-          <mesh position={[0, 0, -0.5]}>
+          <mesh position={[0, 0, 0]}>
             <planeGeometry args={[2, 2]} />
             <meshBasicMaterial color="black" transparent opacity={0} />
           </mesh>
@@ -167,7 +179,7 @@ export default function Shader() {
               ref={(el) => (meshRefs.current[index] = el)}
               rotation-z={mesh.rotation}
             >
-              <planeGeometry args={[0.5, 0.5]} />
+              <planeGeometry args={[100, 100, 1, 1]} />
               <meshBasicMaterial
                 map={brush}
                 transparent={true}
